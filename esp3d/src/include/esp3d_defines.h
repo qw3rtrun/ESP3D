@@ -143,6 +143,8 @@ typedef uint ESP3DSettingIndex;
 #define ESP_USB_SERIAL_BAUD_RATE   1253  // 4  bytes= int
 #define ESP_STA_FALLBACK_RETRY 1257     // 1 byte = flag
 #define ESP_USB_CDC_ON 1258             // 1 byte = flag
+#define ESP_RAW_TELNET_PORT 1259        // 4  bytes= int
+#define ESP_RAW_TELNET_ON 1263          // 1 byte = flag
 
 // Hidden password
 #define HIDDEN_PASSWORD "********"

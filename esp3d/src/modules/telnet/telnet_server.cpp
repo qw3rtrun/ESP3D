@@ -32,6 +32,9 @@
 #include "telnet_server.h"
 
 Telnet_Server telnet_server;
+#if defined(RAW_TELNET_FEATURE)
+Telnet_Server raw_telnet_server(true);
+#endif  // RAW_TELNET_FEATURE
 
 #define TIMEOUT_TELNET_FLUSH 1500
 
@@ -62,9 +65,11 @@ bool Telnet_Server::isConnected() {
       }
       _telnetClients = _telnetserver->accept();
   #ifndef DISABLE_TELNET_WELCOME_MESSAGE
-      // new client
-      writeBytes((uint8_t *)TELNET_WELCOME_MESSAGE,
-                 strlen(TELNET_WELCOME_MESSAGE));
+      // new client, raw clients get nothing but printer output
+      if (!_israw) {
+        writeBytes((uint8_t *)TELNET_WELCOME_MESSAGE,
+                   strlen(TELNET_WELCOME_MESSAGE));
+      }
   #endif  // DISABLE_TELNET_WELCOME_MESSAGE
       initAuthentication();
     }
@@ -85,10 +90,11 @@ const char *Telnet_Server::clientIPAddress() {
   return res.c_str();
 }
 
-Telnet_Server::Telnet_Server() {
+Telnet_Server::Telnet_Server(bool raw) {
   _buffer_size = 0;
   _started = false;
   _isdebug = false;
+  _israw = raw;
   _port = 0;
   _buffer = nullptr;
   _telnetserver = nullptr;
@@ -101,17 +107,19 @@ Telnet_Server::~Telnet_Server() { end(); }
  */
 bool Telnet_Server::begin(uint16_t port, bool debug) {
   end();
-  if (ESP3DSettings::readByte(ESP_TELNET_ON) != 1) {
+  if (ESP3DSettings::readByte(_israw ? ESP_RAW_TELNET_ON : ESP_TELNET_ON) !=
+      1) {
     return true;
   }
   // Get telnet port
   if (port == 0) {
-    _port = ESP3DSettings::readUint32(ESP_TELNET_PORT);
+    _port = ESP3DSettings::readUint32(_israw ? ESP_RAW_TELNET_PORT
+                                             : ESP_TELNET_PORT);
   } else {
     _port = port;
   }
   _isdebug = debug;
-  if (!_isdebug) {
+  if (!_isdebug && !_israw) {
     _buffer = (uint8_t *)malloc(ESP3D_TELNET_BUFFER_SIZE + 1);
     if (!_buffer) {
       return false;
@@ -176,7 +184,11 @@ void Telnet_Server::handle() {
         size_t count = _telnetClients.read(sbuf, len);
         // push to buffer
         if (count > 0) {
-          push2buffer(sbuf, count);
+          if (_israw) {
+            forwardRaw(sbuf, count);
+          } else {
+            push2buffer(sbuf, count);
+          }
         }
         // free buffer
         free(sbuf);
@@ -231,6 +243,23 @@ void Telnet_Server::flushData(const uint8_t *data, size_t size, ESP3DMessageType
   _lastflush = millis();
 }
 
+
+// Send data read from a raw client straight to the output client: no line
+// assembly, no flush timeout, no [ESPxxx] or realtime command detection
+void Telnet_Server::forwardRaw(const uint8_t *data, size_t size) {
+  ESP3DMessage *message = esp3d_message_manager.newMsg(
+      ESP3DClientType::raw_telnet, esp3d_commands.getOutputClient(), data,
+      size, _auth);
+  if (message) {
+    message->type = ESP3DMessageType::unique;
+    // dispatch() deletes the message on failure
+    if (!esp3d_commands.dispatch(message)) {
+      esp3d_log_e("Raw telnet dispatch failed");
+    }
+  } else {
+    esp3d_log_e("Cannot create message");
+  }
+}
 
 void Telnet_Server::flushChar(char c) { flushData((uint8_t *)&c, 1, ESP3DMessageType::realtimecmd); }
 

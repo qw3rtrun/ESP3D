@@ -76,6 +76,13 @@ The json format is
 * Get/Set Telnet port    
     `[ESP131]<port> json=<no> pwd=<admin password>`
 
+* Get/Set Raw telnet state which can be ON, OFF, CLOSE   
+    `[ESP132]<state> json=<no> pwd=<admin password>`  
+    Needs `RAW_TELNET_FEATURE`. Data from the raw telnet client goes to the printer unchanged: no line buffering, no flush timeout, and no `[ESPxxx]` command processing. Printer output is sent to it like to any other client. Off by default, applied after restart.
+
+* Get/Set Raw telnet port (default 8023)   
+    `[ESP133]<port> json=<no> pwd=<admin password>`
+
 * Sync / Set / Get current time   
     `[ESP140]<SYNC> <srv1=XXXXX> <srv2=XXXXX> <srv3=XXXXX> <tzone=+HH:SS> <time=YYYY-MM-DDTHH:mm:ss> <ntp=yes/no> <NOW> json=<no> pwd=<admin password>`
 

@@ -367,6 +367,19 @@ void ESP3DCommands::ESP400(int cmd_params_pos, ESP3DMessage* msg) {
                   nullptr, 65535, 1, -1, -1, nullptr, true, target, requestId);
 #endif  // TELNET_FEATURE
 
+#ifdef RAW_TELNET_FEATURE
+  // RAW TELNET On service/rawtelnetp
+  dispatchSetting(json, "service/rawtelnetp", ESP_RAW_TELNET_ON, "enable",
+                  YesNoValues, YesNoLabels,
+                  sizeof(YesNoValues) / sizeof(char*), -1, -1, -1, nullptr,
+                  true, target, requestId);
+
+  // RAW TELNET Port
+  dispatchSetting(json, "service/rawtelnetp", ESP_RAW_TELNET_PORT, "port",
+                  nullptr, nullptr, 65535, 1, -1, -1, nullptr, true, target,
+                  requestId);
+#endif  // RAW_TELNET_FEATURE
+
 #ifdef WS_DATA_FEATURE
   // Websocket On service
   dispatchSetting(json, "service/websocketp", ESP_WEBSOCKET_ON, "enable",

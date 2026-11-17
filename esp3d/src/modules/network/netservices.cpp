@@ -258,6 +258,27 @@ bool NetServices::begin() {
     }
   }
 #endif  // TELNET_FEATURE
+#ifdef RAW_TELNET_FEATURE
+  if (!raw_telnet_server.begin()) {
+    res = false;
+    esp3d_log_e("Raw telnet server failed");
+    esp3d_commands.dispatch("Raw telnet server failed",
+                            ESP3DClientType::all_clients, no_id,
+                            ESP3DMessageType::unique, ESP3DClientType::system,
+                            ESP3DAuthenticationLevel::admin);
+  } else {
+    if (raw_telnet_server.started()) {
+      String stmp = "Raw telnet server started port " +
+                    String(raw_telnet_server.port());
+      if (ESP3DSettings::isVerboseBoot()) {
+        esp3d_commands.dispatch(stmp.c_str(), ESP3DClientType::all_clients,
+                                no_id, ESP3DMessageType::unique,
+                                ESP3DClientType::system,
+                                ESP3DAuthenticationLevel::admin);
+      }
+    }
+  }
+#endif  // RAW_TELNET_FEATURE
 #ifdef FTP_FEATURE
   if (!ftp_server.begin()) {
     res = false;
@@ -446,6 +467,9 @@ void NetServices::end() {
 #ifdef TELNET_FEATURE
   telnet_server.end();
 #endif  // TELNET_FEATURE
+#ifdef RAW_TELNET_FEATURE
+  raw_telnet_server.end();
+#endif  // RAW_TELNET_FEATURE
 #ifdef FTP_FEATURE
   ftp_server.end();
 #endif  // FTP_FEATURE
@@ -482,6 +506,9 @@ void NetServices::handle() {
 #ifdef TELNET_FEATURE
     telnet_server.handle();
 #endif  // TELNET_FEATURE
+#ifdef RAW_TELNET_FEATURE
+    raw_telnet_server.handle();
+#endif  // RAW_TELNET_FEATURE
 #ifdef FTP_FEATURE
     ftp_server.handle();
 #endif  // FTP_FEATURE

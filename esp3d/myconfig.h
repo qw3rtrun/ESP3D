@@ -33,4 +33,17 @@
  */
 #define WS_DATA_FEATURE
 
+/* Use telnet server (off by default since 3.1)
+ * Enable telnet communications
+ */
+#define TELNET_FEATURE
+
+/* Use raw telnet server (needs TELNET_FEATURE)
+ * Second telnet port that sends client data to the printer as-is: no line
+ * buffering and no [ESPxxx] commands. Printer output is sent to it like to
+ * any other client. Off by default, enable with [ESP132]ON
+ * (port [ESP133], default 8023) and restart.
+ */
+#define RAW_TELNET_FEATURE
+
 #endif  //_MYCONFIG_H
