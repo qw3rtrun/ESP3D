@@ -227,6 +227,13 @@
 #endif
 
 /**************************
+ * Telnet
+ * ***********************/
+#if defined(RAW_TELNET_FEATURE) && !defined(TELNET_FEATURE)
+#error RAW_TELNET_FEATURE needs TELNET_FEATURE (and WiFi or Ethernet)
+#endif  // RAW_TELNET_FEATURE && !TELNET_FEATURE
+
+/**************************
  * Lua
  * ***********************/
 #if defined(ESP_LUA_INTERPRETER_FEATURE) && (defined(ARDUINO_ARCH_ESP8266) ||  defined(ARDUINO_ARCH_ESP8285))

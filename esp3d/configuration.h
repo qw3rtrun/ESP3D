@@ -115,7 +115,7 @@
  * SMOOTHIEWARE
  * REPETIER
  */
-#define DEFAULT_FW UNKNOWN_FW
+// #define DEFAULT_FW MARLIN
 
 /************************************
  *
@@ -602,7 +602,7 @@
 /* Enable direct control pin
  * Controls pins using [ESP201]
  */
-#define DIRECT_PIN_FEATURE
+// #define DIRECT_PIN_FEATURE
 
 /************************************
  *

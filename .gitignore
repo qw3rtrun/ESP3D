@@ -1,3 +1,4 @@
+.idea
 Thumbs.db
 .DS_Store
 *.orig
@@ -9,5 +10,4 @@ embedded/node_modules
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/arduino.json
-esp3d/myconfig.h
 __pycache__

@@ -87,6 +87,10 @@ class ESP3DCommands {
   void ESP130(int cmd_params_pos, ESP3DMessage* msg);
   void ESP131(int cmd_params_pos, ESP3DMessage* msg);
 #endif  // TELNET_FEATURE
+#if defined(RAW_TELNET_FEATURE)
+  void ESP132(int cmd_params_pos, ESP3DMessage* msg);
+  void ESP133(int cmd_params_pos, ESP3DMessage* msg);
+#endif  // RAW_TELNET_FEATURE
 #if defined(TIMESTAMP_FEATURE)
   void ESP140(int cmd_params_pos, ESP3DMessage* msg);
 #endif  // TIMESTAMP_FEATURE

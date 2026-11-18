@@ -64,6 +64,11 @@ const char* help[] = {
     "[ESP130](State) - display/set Telnet state which can be ON, OFF",
     "[ESP131](Port) - display/set Telnet port",
 #endif  // TELNET_FEATURE
+#if defined(RAW_TELNET_FEATURE)
+    "[ESP132](State) - display/set Raw telnet state which can be ON, OFF, "
+    "CLOSE",
+    "[ESP133](Port) - display/set Raw telnet port",
+#endif  // RAW_TELNET_FEATURE
 #if defined(TIMESTAMP_FEATURE)
     "[ESP140](SYNC) (srv1=xxxx) (srv2=xxxx) (srv3=xxxx) (tzone=xxx) "
     "(time=YYYY-MM-DDTHH:mm:ss)(ntp=YES/NO) (SYNC) (NOW)- sync/display/set "
@@ -231,6 +236,9 @@ const uint cmdlist[] = {
 #if defined(TELNET_FEATURE)
     130, 131,
 #endif  // TELNET_FEATURE
+#if defined(RAW_TELNET_FEATURE)
+    132, 133,
+#endif  // RAW_TELNET_FEATURE
 #if defined(TIMESTAMP_FEATURE)
     140,
 #endif  // TIMESTAMP_FEATURE

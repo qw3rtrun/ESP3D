@@ -138,6 +138,7 @@
 #define DEFAULT_USB_CDC_ON "1"
 #define DEFAULT_WEBDAV_ON "1"
 #define DEFAULT_TELNET_ON "1"
+#define DEFAULT_RAW_TELNET_ON "0"
 #define DEFAULT_WEBSOCKET_ON "1"
 #define DEFAULT_NOTIFICATION_TYPE "0"
 #define DEFAULT_NOTIFICATION_TOKEN1 ""
@@ -159,6 +160,7 @@
 #define DEFAULT_WEBSOCKET_PORT "8282"
 #define DEFAULT_WEBDAV_PORT "8181"
 #define DEFAULT_TELNET_PORT "23"
+#define DEFAULT_RAW_TELNET_PORT "8023"
 #define DEFAULT_SENSOR_INTERVAL "30000"
 #define DEFAULT_BOOT_DELAY "10000"
 #define DEFAULT_CALIBRATION_VALUE "0"
@@ -229,6 +231,7 @@ uint16_t ESP3DSettingsData[] = {ESP_RADIO_MODE,
                                 ESP_INTERNET_TIME,
                                 ESP_HTTP_ON,
                                 ESP_TELNET_ON,
+                                ESP_RAW_TELNET_ON,
                                 ESP_WEBSOCKET_ON,
                                 ESP_SD_SPEED_DIV,
                                 ESP_SENSOR_TYPE,
@@ -256,6 +259,7 @@ uint16_t ESP3DSettingsData[] = {ESP_RADIO_MODE,
                                 ESP_BAUD_RATE,
                                 ESP_HTTP_PORT,
                                 ESP_TELNET_PORT,
+                                ESP_RAW_TELNET_PORT,
                                 ESP_SENSOR_INTERVAL,
                                 ESP_BOOT_DELAY,
                                 ESP_WEBSOCKET_PORT,
@@ -296,6 +300,18 @@ bool ESP3DSettings::begin() {
     writeByte(ESP_STA_FALLBACK_RETRY, atoi(DEFAULT_STA_FALLBACK_RETRY));
   }
 #endif  // WIFI_FEATURE
+#if defined(RAW_TELNET_FEATURE)
+  // Settings saved by older builds have no value here yet
+  uint8_t rawTelnetOn = readByte(ESP_RAW_TELNET_ON);
+  if (rawTelnetOn != (uint8_t)ESP3DState::off &&
+      rawTelnetOn != (uint8_t)ESP3DState::on) {
+    writeByte(ESP_RAW_TELNET_ON, atoi(DEFAULT_RAW_TELNET_ON));
+  }
+  if (!isValidIntegerSetting(readUint32(ESP_RAW_TELNET_PORT),
+                             ESP_RAW_TELNET_PORT)) {
+    writeUint32(ESP_RAW_TELNET_PORT, atoi(DEFAULT_RAW_TELNET_PORT));
+  }
+#endif  // RAW_TELNET_FEATURE
   // get target FW
   ESP3DSettings::GetFirmwareTarget(true);
   ESP3DSettings::isVerboseBoot(true);
@@ -919,6 +935,7 @@ bool ESP3DSettings::isValidIntegerSetting(uint32_t value,
     case ESP_WEBDAV_PORT:
     case ESP_HTTP_PORT:
     case ESP_TELNET_PORT:
+    case ESP_RAW_TELNET_PORT:
     case ESP_FTP_CTRL_PORT:
     case ESP_FTP_DATA_ACTIVE_PORT:
     case ESP_FTP_DATA_PASSIVE_PORT:
@@ -965,6 +982,7 @@ bool ESP3DSettings::isValidByteSetting(uint8_t value,
     case ESP_INTERNET_TIME:
     case ESP_HTTP_ON:
     case ESP_TELNET_ON:
+    case ESP_RAW_TELNET_ON:
     case ESP_WEBSOCKET_ON:
     case ESP_SD_CHECK_UPDATE_AT_BOOT:
     case ESP_SETUP:
@@ -1178,6 +1196,7 @@ const ESP3DSettingDescription *ESP3DSettings::getSettingPtr(
     case ESP_INTERNET_TIME:
     case ESP_HTTP_ON:
     case ESP_TELNET_ON:
+    case ESP_RAW_TELNET_ON:
     case ESP_WEBSOCKET_ON:
     case ESP_SD_SPEED_DIV:
     case ESP_SENSOR_TYPE:
@@ -1237,6 +1256,7 @@ const ESP3DSettingDescription *ESP3DSettings::getSettingPtr(
     case ESP_BAUD_RATE:
     case ESP_HTTP_PORT:
     case ESP_TELNET_PORT:
+    case ESP_RAW_TELNET_PORT:
     case ESP_SENSOR_INTERVAL:
     case ESP_BOOT_DELAY:
     case ESP_WEBSOCKET_PORT:
@@ -1268,6 +1288,7 @@ const ESP3DSettingDescription *ESP3DSettings::getSettingPtr(
     case ESP_INTERNET_TIME:
     case ESP_HTTP_ON:
     case ESP_TELNET_ON:
+    case ESP_RAW_TELNET_ON:
     case ESP_WEBSOCKET_ON:
     case ESP_SD_SPEED_DIV:
     case ESP_SENSOR_TYPE:
@@ -1304,6 +1325,7 @@ const ESP3DSettingDescription *ESP3DSettings::getSettingPtr(
     case ESP_BAUD_RATE:
     case ESP_HTTP_PORT:
     case ESP_TELNET_PORT:
+    case ESP_RAW_TELNET_PORT:
     case ESP_SENSOR_INTERVAL:
     case ESP_BOOT_DELAY:
     case ESP_WEBSOCKET_PORT:
@@ -1405,6 +1427,9 @@ const ESP3DSettingDescription *ESP3DSettings::getSettingPtr(
       break;
     case ESP_TELNET_ON:
       setting.default_val = DEFAULT_TELNET_ON;
+      break;
+    case ESP_RAW_TELNET_ON:
+      setting.default_val = DEFAULT_RAW_TELNET_ON;
       break;
     case ESP_WEBSOCKET_ON:
       setting.default_val = DEFAULT_WEBSOCKET_ON;
@@ -1536,6 +1561,9 @@ const ESP3DSettingDescription *ESP3DSettings::getSettingPtr(
       break;
     case ESP_TELNET_PORT:
       setting.default_val = DEFAULT_TELNET_PORT;
+      break;
+    case ESP_RAW_TELNET_PORT:
+      setting.default_val = DEFAULT_RAW_TELNET_PORT;
       break;
     case ESP_SENSOR_INTERVAL:
       setting.default_val = DEFAULT_SENSOR_INTERVAL;

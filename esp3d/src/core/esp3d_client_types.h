@@ -44,6 +44,7 @@ enum class ESP3DClientType : uint8_t {
   mks_serial = 14,
   lua_script = 15,
   usb_cdc = 16,  // native USB CDC (device mode)
+  raw_telnet = 17,
   command,  // origin only
   system,   // origin only
   all_clients

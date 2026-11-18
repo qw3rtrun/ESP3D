@@ -30,7 +30,9 @@
 
 class Telnet_Server {
  public:
-  Telnet_Server();
+  // raw: pass client data to the output client as-is, without line
+  // buffering or [ESPxxx] command processing
+  explicit Telnet_Server(bool raw = false);
   ~Telnet_Server();
   bool begin(uint16_t port = 0, bool debug = false);
   void end();
@@ -58,6 +60,7 @@ class Telnet_Server {
   ESP3DAuthenticationLevel _auth;
   uint16_t _port;
   bool _isdebug;
+  bool _israw;
   uint32_t _lastflush;
   uint8_t* _buffer;
   size_t _buffer_size;
@@ -65,8 +68,12 @@ class Telnet_Server {
   void flushBuffer();
   void flushChar(char c);
   void flushData(const uint8_t* data, size_t size, ESP3DMessageType type);
+  void forwardRaw(const uint8_t* data, size_t size);
 };
 
 extern Telnet_Server telnet_server;
+#if defined(RAW_TELNET_FEATURE)
+extern Telnet_Server raw_telnet_server;
+#endif  // RAW_TELNET_FEATURE
 
 #endif

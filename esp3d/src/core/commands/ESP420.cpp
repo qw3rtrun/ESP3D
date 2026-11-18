@@ -417,6 +417,25 @@ void ESP3DCommands::ESP420(int cmd_params_pos, ESP3DMessage* msg) {
   }
 
 #endif  // TELNET_FEATURE
+#if defined(RAW_TELNET_FEATURE)
+  if (raw_telnet_server.started()) {
+    // raw telnet port
+    tmpstr = String(raw_telnet_server.port());
+    if (!dispatchIdValue(json, "Raw telnet port", tmpstr.c_str(), target,
+                         requestId, false)) {
+      return;
+    }
+  }
+
+  if (raw_telnet_server.isConnected()) {
+    // raw telnet client IP
+    tmpstr = raw_telnet_server.clientIPAddress();
+    if (!dispatchIdValue(json, "Raw telnet Client", tmpstr.c_str(), target,
+                         requestId, false)) {
+      return;
+    }
+  }
+#endif  // RAW_TELNET_FEATURE
 #if defined(WEBDAV_FEATURE)
   if (webdav_server.started()) {
     // WebDav port

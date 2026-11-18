@@ -30,7 +30,8 @@ const char *const esp3dclientstr[] = {
     "telnet",        "http",          "webui_websocket", "websocket",
     "rendering",     "bluetooth",     "socket_serial",   "echo_serial",
     "serial_bridge", "remote_screen", "mks_serial",      "lua_script",
-    "usb_cdc",       "command",       "system",          "all_clients"};
+    "usb_cdc",       "raw_telnet",    "command",         "system",
+    "all_clients"};
 static_assert(sizeof(esp3dclientstr) / sizeof(esp3dclientstr[0]) ==
                   static_cast<uint8_t>(ESP3DClientType::all_clients) + 1,
               "esp3dclientstr out of sync with ESP3DClientType");
@@ -536,6 +537,18 @@ void ESP3DCommands::execute_internal_command(int cmd, int cmd_params_pos,
       ESP131(cmd_params_pos, msg);
       break;
 #endif  // TELNET_FEATURE
+#ifdef RAW_TELNET_FEATURE
+    // Set RAW TELNET state which can be ON, OFF, CLOSE
+    //[ESP132]<state>pwd=<admin password>
+    case 132:
+      ESP132(cmd_params_pos, msg);
+      break;
+    // Set RAW TELNET port
+    //[ESP133]<port>pwd=<admin password>
+    case 133:
+      ESP133(cmd_params_pos, msg);
+      break;
+#endif  // RAW_TELNET_FEATURE
 #ifdef TIMESTAMP_FEATURE
     // Sync / Set / Get current time
     //[ESP140]<SYNC>  <srv1=XXXXX> <srv2=XXXXX> <srv3=XXXXX> <zone=xxx>
@@ -1444,6 +1457,16 @@ bool ESP3DCommands::dispatch(ESP3DMessage *msg) {
       break;
 #endif  // TELNET_FEATURE
 
+#ifdef RAW_TELNET_FEATURE
+    case ESP3DClientType::raw_telnet:
+      esp3d_log("Raw telnet message");
+      if (!raw_telnet_server.dispatch(msg)) {
+        sendOk = false;
+        esp3d_log_e("Raw telnet dispatch failed");
+      }
+      break;
+#endif  // RAW_TELNET_FEATURE
+
 #ifdef BLUETOOTH_FEATURE
     case ESP3DClientType::bluetooth:
       esp3d_log("Bluetooth message");
@@ -1708,6 +1731,25 @@ bool ESP3DCommands::dispatch(ESP3DMessage *msg) {
           esp3d_log("Telnet not connected");
       }
 #endif  // TELNET_FEATURE
+
+#ifdef RAW_TELNET_FEATURE
+      if (msg->origin != ESP3DClientType::raw_telnet &&
+          raw_telnet_server.isConnected()) {
+        if (msg->target == ESP3DClientType::all_clients) {
+          // become the reference message
+          msg->target = ESP3DClientType::raw_telnet;
+        } else {
+          // duplicate message because current is  already pending
+          ESP3DMessage *copy_msg = esp3d_message_manager.copyMsg(*msg);
+          if (copy_msg) {
+            copy_msg->target = ESP3DClientType::raw_telnet;
+            dispatch(copy_msg);
+          } else {
+            esp3d_log_e("Cannot duplicate message for raw telnet");
+          }
+        }
+      }
+#endif  // RAW_TELNET_FEATURE
 
 #ifdef HTTP_FEATURE  // http cannot be in all client because it depend of any
                      // connection of the server
